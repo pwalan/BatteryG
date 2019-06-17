@@ -25,11 +25,13 @@ public class HBaseUtils {
     }
 
     public static void createNamespace(String namespace) throws IOException {
+        init();
         try {
             admin.createNamespace(NamespaceDescriptor.create(namespace).build());
         } catch (NamespaceExistException e) {
             System.out.println("该命名空间已经存在");
         }
+        destory();
     }
 
     public static void createTable(String namespace, String tableName, String famliyName) throws IOException {
@@ -145,13 +147,29 @@ public class HBaseUtils {
         destory();
     }
 
+    public static void deleteTable(String namespace, String tableName) throws IOException {
+        init();
+        tname = TableName.valueOf(namespace + ":" + tableName);
+        if (admin.tableExists(tname)) {
+            System.out.println("正在删除表");
+            admin.disableTable(tname);//先禁用表才能删除
+            admin.deleteTable(tname);
+            System.out.println("删除表成功！");
+        } else {
+            System.out.println("表不存在");
+        }
+        destory();
+    }
+
     public static void destory() throws IOException {
         admin.close();
         connection.close();
     }
 
     public static void main(String[] args) throws Exception {
-        //createTable("MyNamespace", "test", "core");
+        deleteTable("MyNamespace", "test");
+
+        createTable("MyNamespace", "test", "core");
 
         String filePath = "/Users/alanp/Downloads/abcdefg";
         //insertFromOneFile("MyNamespace", "test", filePath);
