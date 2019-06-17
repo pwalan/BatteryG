@@ -66,7 +66,6 @@ public class HBaseUtils {
         int i = 0;
 
         while ((s = in.readLine()) != null) {
-
             String[] items = s.split(",");
             // 一个put代表一行数据，再new一个put表示第二行数据,每行一个唯一的RowKey
             Put put = new Put((file.getName() + items[1].split(":")[1]).getBytes());
@@ -82,6 +81,7 @@ public class HBaseUtils {
             }
             htable.put(put);
             if (i++ % 2000 == 0) {
+                System.out.println("目前正在处理数据" + i);
                 htable.flushCommits();
             }
         }
@@ -90,7 +90,18 @@ public class HBaseUtils {
     }
 
     public static void insertFromDirectory(String namespace, String tableName, String dirPath) throws IOException {
-
+        File file = new File(dirPath);
+        if (file.isDirectory()) {
+            System.out.println("文件夹");
+            String[] filelist = file.list();
+            for (int i = 0; i < filelist.length; i++) {
+                File readfile = new File(dirPath + "/" + filelist[i]);
+                if (!readfile.isDirectory()) {
+                    System.out.println("正在处理文件" + (i + 1));
+                    insertFromOneFile("MyNamespace", "test", readfile.getPath());
+                }
+            }
+        }
     }
 
 
@@ -121,7 +132,7 @@ public class HBaseUtils {
 
         } else {
             for (Cell kv : result.rawCells()) {
-                System.out.println(Bytes.toString(CellUtil.cloneFamily(kv)) + ":" + Bytes.toString(CellUtil.cloneQualifier(kv))+",");
+                System.out.println(Bytes.toString(CellUtil.cloneFamily(kv)) + ":" + Bytes.toString(CellUtil.cloneQualifier(kv)) + ",");
                 /*System.out.println(
                         "列:" + Bytes.toString(CellUtil.cloneFamily(kv)) + ":" + Bytes.toString(CellUtil.cloneQualifier(kv))
                                 + "\t 值:" + Bytes.toString(CellUtil.cloneValue(kv)));*/
@@ -136,8 +147,11 @@ public class HBaseUtils {
         String filePath = "/Users/alanp/Downloads/abcdefg";
         //insertFromOneFile("MyNamespace", "test", filePath);
 
+        String dirPath = "/Users/alanp/Downloads/resume";
+        //insertFromDirectory("MyNamespace", "test", dirPath);
+
         //getAllData("MyNamespace", "test");
 
-        getValueFromKey("MyNamespace", "test", "abcdefg20160304154448");
+        //getValueFromKey("MyNamespace", "test", "abcdefg20160304154448");
     }
 }
