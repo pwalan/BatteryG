@@ -47,6 +47,7 @@ public class HBaseUtils {
             admin.createTable(tDescriptor);
             System.out.println("创建表成功！");
         }
+        destory();
     }
 
     public static void insertFromOneFile(String namespace, String tableName, String filePath) throws IOException {
@@ -80,13 +81,14 @@ public class HBaseUtils {
                 }
             }
             htable.put(put);
-            if (i++ % 2000 == 0) {
+            if (i++ % 50 == 0) {
                 System.out.println("目前正在处理数据" + i);
                 htable.flushCommits();
             }
         }
         htable.flushCommits();
         htable.close();
+        destory();
     }
 
     public static void insertFromDirectory(String namespace, String tableName, String dirPath) throws IOException {
@@ -118,6 +120,7 @@ public class HBaseUtils {
                         + Bytes.toString(kv.getValue()));
             }
         }
+        destory();
     }
 
     public static void getValueFromKey(String namespace, String tableName, String rowKey) throws IOException {
@@ -139,6 +142,12 @@ public class HBaseUtils {
             }
 
         }
+        destory();
+    }
+
+    public static void destory() throws IOException {
+        admin.close();
+        connection.close();
     }
 
     public static void main(String[] args) throws Exception {
